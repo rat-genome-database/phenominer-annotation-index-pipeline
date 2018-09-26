@@ -1,0 +1,14 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="manager" class="edu.mcw.rgd.dataload.PhenoAnnotIndex">
+        <property name="version" value="PhenominerAnnotationIndex Pipeline v. 1.1.1   (Sep 26, 2018)" />
+		<property name="ontologies">
+			<map>
+				<entry key="3" value="RS,CMO,MMO,XCO" />
+				<entry key="4" value="CS,CMO,MMO,XCO" />
+			</map>
+		</property>
+	</bean>
+
+</beans>

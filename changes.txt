@@ -1,0 +1,14 @@
+ver 1.1.1,  Sep 26, 2018
+  moved from subversion to github
+
+ver 1.1.0,  Mar 28, 2018
+  fixed delete logic
+
+ver 1.0.2,  Jul 7, 2017
+  fixed computation of data for sex=male,female
+
+ver 1.0.1,  Jul 5, 2017
+  added chinchilla to list of species supported by the pipeline
+
+ver 1.0.0,  Jun 19, 2017
+  first version of the pipeline

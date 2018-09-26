@@ -1,0 +1,188 @@
+package edu.mcw.rgd.dataload;
+
+import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.process.Utils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.FileSystemResource;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Pipeline job to populate PHENOMINER_RECORD_IDS table
+ */
+public class PhenoAnnotIndex {
+
+    Log log = LogFactory.getLog("core");
+    Dao dao = new Dao();
+
+    static int totalRowsInserted = 0;
+    static int totalRowsUpdated = 0;
+    static int totalRowsDeleted = 0;
+    static int totalRowsUpToDate = 0;
+
+    private String version;
+    private Map<Integer, String> ontologies;
+
+    public static void main(String[] args) throws Exception {
+
+        DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+        new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
+        PhenoAnnotIndex manager = (PhenoAnnotIndex) (bf.getBean("manager"));
+        manager.log.info("--- "+manager.getVersion()+" ---");
+
+        try {
+            long time0 = System.currentTimeMillis();
+            manager.log.info("Starting phenominer annotation index pipeline");
+            manager.runPipeline();
+            manager.log.info("Finished phenominer annotation pipeline: elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+            manager.log.info("   rows inserted: " + totalRowsInserted);
+            manager.log.info("   rows deleted:  " + totalRowsDeleted);
+            manager.log.info("   rows updated:  " + totalRowsUpdated);
+            manager.log.info("   rows up-to-date:" + totalRowsUpToDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            manager.log.error(e);
+            throw e;
+        }
+    }
+
+    public void runPipeline() throws Exception {
+
+        for( Map.Entry<Integer, String> entry: getOntologies().entrySet() ) {
+
+            int speciesTypeKey = entry.getKey();
+            String[] ontIds = entry.getValue().split("[,]");
+
+            for( String ontId: ontIds ) {
+                run(ontId, null, speciesTypeKey);
+
+                // CS,RS ontology run also for sex: 'male' and 'female'
+                if (ontId.equals("RS") || ontId.equals("CS")) {
+                    run(ontId, "male", speciesTypeKey);
+                    run(ontId, "female", speciesTypeKey);
+                }
+            }
+        }
+    }
+
+    public void run(String ontId, String sex, int speciesTypeKey) throws Exception {
+
+        String msgPrefix = ontId+" sex:"+sex+" "+ SpeciesType.getCommonName(speciesTypeKey);
+
+        List<Record> recordsInRgd = dao.getAllRecords(ontId, sex, speciesTypeKey);
+        System.out.println(msgPrefix+" records in rgd "+recordsInRgd.size());
+
+        // compute incoming terms
+        List<Record> incomingRecords = new ArrayList<>();
+
+        List<Term> terms = dao.getActiveTerms(ontId);
+        for( Term term: terms ) {
+            List<Integer> recordIds = dao.getRecordIdsForTermAndDescendants(term.getAccId(), sex, speciesTypeKey);
+            if( !recordIds.isEmpty() ) {
+                Record r = new Record();
+                Collections.sort(recordIds);
+                r.setExpRecordIds(Utils.concatenate(recordIds,","));
+                r.setTermAcc(term.getAccId());
+                r.setSex(sex);
+                r.setSpeciesTypeKey(speciesTypeKey);
+                incomingRecords.add(r);
+            }
+        }
+        System.out.println(msgPrefix+" records incoming "+incomingRecords.size());
+
+        // insert/update new records if needed
+        Collection<Record> recordsToBeInserted = CollectionUtils.subtract(incomingRecords, recordsInRgd);
+        int rowsInserted = dao.insertRecords(recordsToBeInserted);
+        if( rowsInserted!=0 ) {
+            System.out.println(msgPrefix + " records inserted " + rowsInserted);
+            totalRowsInserted += rowsInserted;
+        }
+
+        // delete records if needed
+        Collection<Record> recordsToBeDeleted = CollectionUtils.subtract(recordsInRgd, incomingRecords);
+        int rowsDeleted = dao.deleteRecords(recordsToBeDeleted);
+        if( rowsDeleted!=0 ) {
+            System.out.println(msgPrefix + " records deleted " + rowsDeleted);
+            totalRowsDeleted += rowsDeleted;
+        }
+
+        // update records if needed
+        Collection<Record> recordsMatching = CollectionUtils.intersection(recordsInRgd, incomingRecords);
+        handleMatchingRecords(recordsMatching, recordsInRgd, incomingRecords, msgPrefix);
+
+        System.out.println();
+    }
+
+    void handleMatchingRecords( Collection<Record> recordsMatching, List<Record> recordsInRgd, List<Record> incomingRecords,
+                                String msgPrefix) throws Exception {
+
+        final AtomicInteger rowsUpToDate = new AtomicInteger(0);
+        final AtomicInteger rowsUpdated = new AtomicInteger(0); // list of expRecordIds could be updated
+        final List<Record> rowsForUpdate = new ArrayList<>();
+
+        recordsMatching.parallelStream().forEach(r -> {
+            String termAcc = r.getTermAcc();
+            Record rInRgd = null;
+            Record rIncoming = null;
+
+            for( Record r1: recordsInRgd ) {
+                if( r1.getTermAcc().equals(termAcc) ) {
+                    rInRgd = r1;
+                    break;
+                }
+            }
+
+            for( Record r2: incomingRecords ) {
+                if( r2.getTermAcc().equals(termAcc) ) {
+                    rIncoming = r2;
+                    break;
+                }
+            }
+
+            if( rInRgd.getExpRecordIds().equals(rIncoming.getExpRecordIds()) ) {
+                rowsUpToDate.incrementAndGet();
+            } else {
+                rowsUpdated.incrementAndGet();
+
+                synchronized (rowsForUpdate) {
+                    rowsForUpdate.add(rIncoming);
+                }
+            }
+        });
+
+        dao.updateRecords(rowsForUpdate);
+
+        if( rowsUpToDate.get()!=0 ) {
+            System.out.println(msgPrefix + " records up-to-date " + rowsUpToDate.get());
+            totalRowsUpToDate += rowsUpToDate.get();
+        }
+
+        if( rowsUpdated.get()!=0 ) {
+            System.out.println(msgPrefix + " records updated " + rowsUpdated.get());
+            totalRowsUpdated += rowsUpdated.get();
+        }
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setOntologies(Map<Integer,String> ontologies) {
+        this.ontologies = ontologies;
+    }
+
+    public Map<Integer,String> getOntologies() {
+        return ontologies;
+    }
+}
+
