@@ -4,8 +4,7 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -18,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PhenoAnnotIndex {
 
-    Log log = LogFactory.getLog("core");
+    Logger log = Logger.getLogger("summary");
     Dao dao = new Dao();
 
     static int totalRowsInserted = 0;
@@ -34,17 +33,9 @@ public class PhenoAnnotIndex {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
         PhenoAnnotIndex manager = (PhenoAnnotIndex) (bf.getBean("manager"));
-        manager.log.info("--- "+manager.getVersion()+" ---");
 
         try {
-            long time0 = System.currentTimeMillis();
-            manager.log.info("Starting phenominer annotation index pipeline");
             manager.runPipeline();
-            manager.log.info("Finished phenominer annotation pipeline: elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
-            manager.log.info("   rows inserted: " + totalRowsInserted);
-            manager.log.info("   rows deleted:  " + totalRowsDeleted);
-            manager.log.info("   rows updated:  " + totalRowsUpdated);
-            manager.log.info("   rows up-to-date:" + totalRowsUpToDate);
         } catch (Exception e) {
             e.printStackTrace();
             manager.log.error(e);
@@ -53,6 +44,10 @@ public class PhenoAnnotIndex {
     }
 
     public void runPipeline() throws Exception {
+
+        log.info("--- "+getVersion()+" ---");
+        long time0 = System.currentTimeMillis();
+        log.info("Starting phenominer annotation index pipeline");
 
         for( Map.Entry<Integer, String> entry: getOntologies().entrySet() ) {
 
@@ -69,6 +64,13 @@ public class PhenoAnnotIndex {
                 }
             }
         }
+
+        log.info("Finished phenominer annotation pipeline: elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        log.info("   rows inserted: " + totalRowsInserted);
+        log.info("   rows deleted:  " + totalRowsDeleted);
+        log.info("   rows updated:  " + totalRowsUpdated);
+        log.info("   rows up-to-date:" + totalRowsUpToDate);
+        log.info("=== OK ===");
     }
 
     public void run(String ontId, String sex, int speciesTypeKey) throws Exception {
@@ -76,7 +78,7 @@ public class PhenoAnnotIndex {
         String msgPrefix = ontId+" sex:"+sex+" "+ SpeciesType.getCommonName(speciesTypeKey);
 
         List<Record> recordsInRgd = dao.getAllRecords(ontId, sex, speciesTypeKey);
-        System.out.println(msgPrefix+" records in rgd "+recordsInRgd.size());
+        log.info(msgPrefix+" records in rgd "+recordsInRgd.size());
 
         // compute incoming terms
         List<Record> incomingRecords = new ArrayList<>();
@@ -94,13 +96,13 @@ public class PhenoAnnotIndex {
                 incomingRecords.add(r);
             }
         }
-        System.out.println(msgPrefix+" records incoming "+incomingRecords.size());
+        log.info(msgPrefix+" records incoming "+incomingRecords.size());
 
         // insert/update new records if needed
         Collection<Record> recordsToBeInserted = CollectionUtils.subtract(incomingRecords, recordsInRgd);
         int rowsInserted = dao.insertRecords(recordsToBeInserted);
         if( rowsInserted!=0 ) {
-            System.out.println(msgPrefix + " records inserted " + rowsInserted);
+            log.info(msgPrefix + " records inserted " + rowsInserted);
             totalRowsInserted += rowsInserted;
         }
 
@@ -108,7 +110,7 @@ public class PhenoAnnotIndex {
         Collection<Record> recordsToBeDeleted = CollectionUtils.subtract(recordsInRgd, incomingRecords);
         int rowsDeleted = dao.deleteRecords(recordsToBeDeleted);
         if( rowsDeleted!=0 ) {
-            System.out.println(msgPrefix + " records deleted " + rowsDeleted);
+            log.info(msgPrefix + " records deleted " + rowsDeleted);
             totalRowsDeleted += rowsDeleted;
         }
 
@@ -116,7 +118,7 @@ public class PhenoAnnotIndex {
         Collection<Record> recordsMatching = CollectionUtils.intersection(recordsInRgd, incomingRecords);
         handleMatchingRecords(recordsMatching, recordsInRgd, incomingRecords, msgPrefix);
 
-        System.out.println();
+        log.info("");
     }
 
     void handleMatchingRecords( Collection<Record> recordsMatching, List<Record> recordsInRgd, List<Record> incomingRecords,
@@ -159,12 +161,12 @@ public class PhenoAnnotIndex {
         dao.updateRecords(rowsForUpdate);
 
         if( rowsUpToDate.get()!=0 ) {
-            System.out.println(msgPrefix + " records up-to-date " + rowsUpToDate.get());
+            log.info(msgPrefix + " records up-to-date " + rowsUpToDate.get());
             totalRowsUpToDate += rowsUpToDate.get();
         }
 
         if( rowsUpdated.get()!=0 ) {
-            System.out.println(msgPrefix + " records updated " + rowsUpdated.get());
+            log.info(msgPrefix + " records updated " + rowsUpdated.get());
             totalRowsUpdated += rowsUpdated.get();
         }
     }

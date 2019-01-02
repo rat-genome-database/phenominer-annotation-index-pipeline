@@ -3,9 +3,7 @@ package edu.mcw.rgd.dataload;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DuplicateKeyException;
+import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
@@ -19,9 +17,9 @@ import java.util.*;
  */
 public class Dao {
 
-    private Log logInserted = LogFactory.getLog("inserted");
-    private Log logUpdated = LogFactory.getLog("updated");
-    private Log logDeleted = LogFactory.getLog("deleted");
+    private Logger logInserted = Logger.getLogger("inserted");
+    private Logger logUpdated = Logger.getLogger("updated");
+    private Logger logDeleted = Logger.getLogger("deleted");
     private PhenominerDAO pdao = new PhenominerDAO();
     private OntologyXDAO odao = new OntologyXDAO();
 
