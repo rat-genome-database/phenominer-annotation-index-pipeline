@@ -1,5 +1,17 @@
 # run PhenominerAnnotationIndex pipeline with commandline parameters
 #    ("$@" passes all cmdline parameters to pipeline program)
 #
-APPHOME=/home/rgddata/pipelines/PhenominerAnnotationIndex
-$APPHOME/_run.sh "$@"
+. /etc/profile
+
+APPNAME=PhenominerAnnotationIndex
+APPDIR=/home/rgddata/pipelines/$APPNAME
+SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
+EMAIL_LIST=mtutaj@mcw.edu
+
+cd $APPDIR
+
+java -Dspring.config=$APPDIR/../properties/default_db.xml \
+    -Dlog4j.configuration=file://$APPDIR/properties/log4j.properties \
+    -jar lib/${APPNAME}.jar "$@" 2>&1 > $APPDIR/run.log
+
+mailx -s "[$SERVER] Output from phenominer annotation index pipeline" $EMAIL_LIST < $APPDIR/logs/summary.log
