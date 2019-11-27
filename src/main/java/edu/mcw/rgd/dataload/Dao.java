@@ -23,6 +23,10 @@ public class Dao {
     private PhenominerDAO pdao = new PhenominerDAO();
     private OntologyXDAO odao = new OntologyXDAO();
 
+    public String getConnectionInfo() {
+        return pdao.getConnectionInfo();
+    }
+
     public List<Record> getAllRecords(String ontId, final String sex, final int speciesTypeKey) throws Exception {
 
         String sql = "SELECT term_acc,experiment_record_ids FROM phenominer_record_ids "+

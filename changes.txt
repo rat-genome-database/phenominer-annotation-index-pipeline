@@ -1,3 +1,6 @@
+Nov 27, 2019
+  improved summary email
+
 Nov 22, 2019
   removed unused logger from log4j.properties
 

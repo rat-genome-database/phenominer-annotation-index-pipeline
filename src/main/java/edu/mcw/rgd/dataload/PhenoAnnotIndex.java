@@ -9,6 +9,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,9 +46,11 @@ public class PhenoAnnotIndex {
 
     public void runPipeline() throws Exception {
 
-        log.info("--- "+getVersion()+" ---");
         long time0 = System.currentTimeMillis();
-        log.info("Starting phenominer annotation index pipeline");
+        log.info(getVersion());
+        log.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.info("   started at "+sdt.format(new Date(time0)));
 
         for( Map.Entry<Integer, String> entry: getOntologies().entrySet() ) {
 
@@ -65,12 +68,19 @@ public class PhenoAnnotIndex {
             }
         }
 
-        log.info("Finished phenominer annotation pipeline: elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
-        log.info("   rows inserted: " + totalRowsInserted);
-        log.info("   rows deleted:  " + totalRowsDeleted);
-        log.info("   rows updated:  " + totalRowsUpdated);
-        log.info("   rows up-to-date:" + totalRowsUpToDate);
-        log.info("=== OK ===");
+        if( totalRowsInserted!=0 ) {
+            log.info("   rows inserted:  " + totalRowsInserted);
+        }
+        if( totalRowsDeleted!=0 ) {
+            log.info("   rows deleted:   " + totalRowsDeleted);
+        }
+        if( totalRowsUpdated!=0 ) {
+            log.info("   rows updated:   " + totalRowsUpdated);
+        }
+        if( totalRowsUpToDate!=0 ) {
+            log.info("   rows up-to-date: " + totalRowsUpToDate);
+        }
+        log.info("=== OK ===  elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
 
     public void run(String ontId, String sex, int speciesTypeKey) throws Exception {
