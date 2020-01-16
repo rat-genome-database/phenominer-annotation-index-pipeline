@@ -24,7 +24,6 @@ public class Record {
 
         return Utils.stringsAreEqual(this.termAcc, r.termAcc) &&
                 Utils.stringsAreEqual(this.sex, r.sex) &&
-//                Utils.stringsAreEqual(this.expRecordIds, r.expRecordIds) &&
                 this.speciesTypeKey==r.speciesTypeKey;
     }
 
@@ -32,7 +31,6 @@ public class Record {
     public int hashCode() {
         int result = termAcc.hashCode();
         result = 31 * result + Utils.defaultString(sex).hashCode();
-  //      result = 31 * result + expRecordIds.hashCode();
         result = 31 * result + speciesTypeKey;
         return result;
     }
@@ -59,10 +57,9 @@ public class Record {
     }
 
     public void setSex(String sex){
-        String sexInDb = sex==null ? null :
+        this.sex = sex==null ? null :
                 sex.equals("male") ? "M" :
                 sex.equals("female") ? "F" : null;
-        this.sex = sexInDb;
     }
 
     public int getSpeciesTypeKey() {

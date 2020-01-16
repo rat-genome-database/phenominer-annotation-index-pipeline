@@ -1,3 +1,6 @@
+Jan 16, 2020
+  updated apache commons collections dependency
+
 Dec 05, 2019
   moved from dbcp to dbcp2
 
