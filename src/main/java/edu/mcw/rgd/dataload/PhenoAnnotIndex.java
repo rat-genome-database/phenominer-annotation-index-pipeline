@@ -85,7 +85,7 @@ public class PhenoAnnotIndex {
 
     public void run(String ontId, String sex, int speciesTypeKey) throws Exception {
 
-        String msgPrefix = ontId+" sex:"+sex+" "+ SpeciesType.getCommonName(speciesTypeKey);
+        String msgPrefix = ontId+" sex:"+Utils.NVL(sex,"any")+" "+ SpeciesType.getCommonName(speciesTypeKey);
 
         List<Record> recordsInRgd = dao.getAllRecords(ontId, sex, speciesTypeKey);
         log.info(msgPrefix+" records in rgd "+recordsInRgd.size());
