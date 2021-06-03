@@ -69,16 +69,16 @@ public class PhenoAnnotIndex {
         }
 
         if( totalRowsInserted!=0 ) {
-            log.info("   rows inserted:  " + totalRowsInserted);
+            log.info("   rows inserted:  " + Utils.formatThousands(totalRowsInserted));
         }
         if( totalRowsDeleted!=0 ) {
-            log.info("   rows deleted:   " + totalRowsDeleted);
+            log.info("   rows deleted:   " + Utils.formatThousands(totalRowsDeleted));
         }
         if( totalRowsUpdated!=0 ) {
-            log.info("   rows updated:   " + totalRowsUpdated);
+            log.info("   rows updated:   " + Utils.formatThousands(totalRowsUpdated));
         }
         if( totalRowsUpToDate!=0 ) {
-            log.info("   rows up-to-date: " + totalRowsUpToDate);
+            log.info("   rows up-to-date: " + Utils.formatThousands(totalRowsUpToDate));
         }
         log.info("=== OK ===  elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
@@ -88,7 +88,7 @@ public class PhenoAnnotIndex {
         String msgPrefix = ontId+" sex:"+Utils.NVL(sex,"any")+" "+ SpeciesType.getCommonName(speciesTypeKey);
 
         List<Record> recordsInRgd = dao.getAllRecords(ontId, sex, speciesTypeKey);
-        log.info(msgPrefix+" records in rgd "+recordsInRgd.size());
+        log.info(msgPrefix+" records in rgd "+Utils.formatThousands(recordsInRgd.size()));
 
         // compute incoming terms
         List<Record> incomingRecords = new ArrayList<>();
@@ -106,13 +106,13 @@ public class PhenoAnnotIndex {
                 incomingRecords.add(r);
             }
         }
-        log.info(msgPrefix+" records incoming "+incomingRecords.size());
+        log.info(msgPrefix+" records incoming "+Utils.formatThousands(incomingRecords.size()));
 
         // insert/update new records if needed
         Collection<Record> recordsToBeInserted = CollectionUtils.subtract(incomingRecords, recordsInRgd);
         int rowsInserted = dao.insertRecords(recordsToBeInserted);
         if( rowsInserted!=0 ) {
-            log.info(msgPrefix + " records inserted " + rowsInserted);
+            log.info(msgPrefix + " records inserted " + Utils.formatThousands(rowsInserted));
             totalRowsInserted += rowsInserted;
         }
 
@@ -120,7 +120,7 @@ public class PhenoAnnotIndex {
         Collection<Record> recordsToBeDeleted = CollectionUtils.subtract(recordsInRgd, incomingRecords);
         int rowsDeleted = dao.deleteRecords(recordsToBeDeleted);
         if( rowsDeleted!=0 ) {
-            log.info(msgPrefix + " records deleted " + rowsDeleted);
+            log.info(msgPrefix + " records deleted " + Utils.formatThousands(rowsDeleted));
             totalRowsDeleted += rowsDeleted;
         }
 
@@ -171,12 +171,12 @@ public class PhenoAnnotIndex {
         dao.updateRecords(rowsForUpdate);
 
         if( rowsUpToDate.get()!=0 ) {
-            log.info(msgPrefix + " records up-to-date " + rowsUpToDate.get());
+            log.info(msgPrefix + " records up-to-date " + Utils.formatThousands(rowsUpToDate.get()));
             totalRowsUpToDate += rowsUpToDate.get();
         }
 
         if( rowsUpdated.get()!=0 ) {
-            log.info(msgPrefix + " records updated " + rowsUpdated.get());
+            log.info(msgPrefix + " records updated " + Utils.formatThousands(rowsUpdated.get()));
             totalRowsUpdated += rowsUpdated.get();
         }
     }
