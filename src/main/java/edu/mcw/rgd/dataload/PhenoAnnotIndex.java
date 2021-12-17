@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PhenoAnnotIndex {
 
-    Logger log = LogManager.getLogger("summary");
+    Logger log = LogManager.getLogger("status");
     Dao dao = new Dao();
 
     static int totalRowsInserted = 0;
