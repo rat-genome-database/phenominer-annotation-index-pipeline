@@ -4,7 +4,8 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PhenoAnnotIndex {
 
-    Logger log = Logger.getLogger("summary");
+    Logger log = LogManager.getLogger("summary");
     Dao dao = new Dao();
 
     static int totalRowsInserted = 0;
@@ -38,8 +39,7 @@ public class PhenoAnnotIndex {
         try {
             manager.runPipeline();
         } catch (Exception e) {
-            e.printStackTrace();
-            manager.log.error(e);
+            Utils.printStackTrace(e, manager.log);
             throw e;
         }
     }

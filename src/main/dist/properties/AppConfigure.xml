@@ -2,7 +2,7 @@
 
 <beans>
 	<bean id="manager" class="edu.mcw.rgd.dataload.PhenoAnnotIndex">
-        <property name="version" value="PhenominerAnnotationIndex Pipeline   -- build Jun 03, 2021" />
+        <property name="version" value="PhenominerAnnotationIndex Pipeline   -- build Dec 17, 2021" />
 		<property name="ontologies">
 			<map>
 				<entry key="3" value="RS,CMO,MMO,XCO" />
