@@ -15,6 +15,8 @@ targetCompatibility = 1.8
 mainClassName = 'edu.mcw.rgd.dataload.PhenoAnnotIndex'
 String myAppName = 'PhenominerAnnotationIndex'
 
+project.archivesBaseName = myAppName
+
 repositories {
     mavenCentral()
 }
@@ -22,16 +24,16 @@ repositories {
 dependencies {
     compile 'org.apache.commons:commons-collections4:4.4'
     compile 'org.apache.commons:commons-dbcp2:2.8.0'
-    compile 'log4j:log4j:1.2.17'
+    compile 'org.apache.logging.log4j:log4j-api:2.16.0'
+    compile 'org.apache.logging.log4j:log4j-core:2.16.0'
     compile 'com.oracle.ojdbc:ojdbc8:19.3.0.0'
-    compile 'org.springframework:spring-beans:5.2.1.RELEASE'
-    compile 'org.springframework:spring-jdbc:5.2.1.RELEASE'
+    compile 'org.springframework:spring-beans:5.2.2.RELEASE'
+    compile 'org.springframework:spring-jdbc:5.2.2.RELEASE'
 
     compile fileTree(dir: 'lib', include: '*.jar')
 }
 
 jar {
-    baseName = myAppName
     manifest {
         attributes(
             'Built-By': System.getProperty('user.name'),
