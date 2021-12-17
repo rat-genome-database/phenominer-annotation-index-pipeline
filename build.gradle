@@ -45,6 +45,12 @@ jar {
     }
 }
 
+distributions {
+    main {
+        baseName = myAppName
+    }
+}
+
 task createDistro(type: Copy) {
     def zipFile = file('build/distributions/'+myAppName+'.zip')
     def outputDir = file("build/install")
