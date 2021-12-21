@@ -13,7 +13,7 @@ apply plugin: 'application'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 mainClassName = 'edu.mcw.rgd.dataload.PhenoAnnotIndex'
-String myAppName = 'PhenominerAnnotationIndex'
+String myAppName = 'phenominer-annotation-index-pipeline'
 
 project.archivesBaseName = myAppName
 
@@ -27,8 +27,8 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-api:2.16.0'
     compile 'org.apache.logging.log4j:log4j-core:2.16.0'
     compile 'com.oracle.ojdbc:ojdbc8:19.3.0.0'
-    compile 'org.springframework:spring-beans:5.2.2.RELEASE'
-    compile 'org.springframework:spring-jdbc:5.2.2.RELEASE'
+    compile 'org.springframework:spring-beans:5.2.3.RELEASE'
+    compile 'org.springframework:spring-jdbc:5.2.3.RELEASE'
 
     compile fileTree(dir: 'lib', include: '*.jar')
 }

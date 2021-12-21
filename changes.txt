@@ -1,4 +1,7 @@
-Dec  17, 2021
+Dec 21, 2021
+  renamed dist app to 'phenominer-annotation-index-pipeline'
+
+Dec 17, 2021
   upgraded log4j to avoid zero-day exploit
 
 Jun 03, 2021
