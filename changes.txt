@@ -1,3 +1,6 @@
+Jan 03, 2022
+  renamed 'master' branch to 'main'
+
 Dec 21, 2021
   renamed dist app to 'phenominer-annotation-index-pipeline'
 
