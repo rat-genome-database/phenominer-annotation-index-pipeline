@@ -1,3 +1,6 @@
+Mar 03, 2022
+  updated README
+
 Jan 25, 2022
   tuned up logging
 
