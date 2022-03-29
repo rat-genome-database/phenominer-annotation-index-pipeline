@@ -1,3 +1,6 @@
+Mar 29, 2022
+  fixed log4j date stamps
+
 Mar 03, 2022
   updated README
 
