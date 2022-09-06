@@ -1,3 +1,6 @@
+Sep 06, 2022
+  updated dependencies
+
 Mar 29, 2022
   fixed log4j date stamps
 
