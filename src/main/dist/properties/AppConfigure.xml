@@ -5,8 +5,8 @@
         <property name="version" value="PhenominerAnnotationIndex Pipeline   -- build Oct 04, 2023" />
 		<property name="ontologies">
 			<map>
-				<entry key="3" value="RS,CMO,MMO,XCO" />
-				<entry key="4" value="CS,CMO,MMO,XCO" />
+				<entry key="3" value="RS,CMO,MMO,XCO,VT" />
+				<entry key="4" value="CS,CMO,MMO,XCO,VT" />
 			</map>
 		</property>
 	</bean>
