@@ -1,3 +1,9 @@
+Jan 08, 2024
+  updated to java 17
+
+Nov 20, 2023
+  added VT to list of processed ontologies
+
 Oct 04, 2023
   updated build.gradle to be gradle 6.x + compatible
 
