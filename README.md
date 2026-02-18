@@ -4,7 +4,7 @@ phenominer tool related SQL queries.
 
 **LOGIC**
 
-processes RS, CS, VT, MMO, CMO and CMO ontologies
+processes RS, CS, VT, MMO, CMO and XCO ontologies
 
 sex
 - all ontologies are processed for sex=null

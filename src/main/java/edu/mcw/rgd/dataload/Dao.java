@@ -18,11 +18,11 @@ import java.util.*;
  */
 public class Dao {
 
-    private Logger logInserted = LogManager.getLogger("inserted");
-    private Logger logUpdated = LogManager.getLogger("updated");
-    private Logger logDeleted = LogManager.getLogger("deleted");
-    private PhenominerDAO pdao = new PhenominerDAO();
-    private OntologyXDAO odao = new OntologyXDAO();
+    private final Logger logInserted = LogManager.getLogger("inserted");
+    private final Logger logUpdated = LogManager.getLogger("updated");
+    private final Logger logDeleted = LogManager.getLogger("deleted");
+    private final PhenominerDAO pdao = new PhenominerDAO();
+    private final OntologyXDAO odao = new OntologyXDAO();
 
     public String getConnectionInfo() {
         return pdao.getConnectionInfo();
