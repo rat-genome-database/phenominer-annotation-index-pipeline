@@ -1,3 +1,8 @@
+Mar 24, 2026
+  added MemoryMonitor to track memory usage during pipeline run
+  updated README.md
+  updated dependencies
+
 Feb 18, 2026
 Sep 16, 2025
 Apr 04, 2025

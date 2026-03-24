@@ -2,6 +2,7 @@ package edu.mcw.rgd.dataload;
 
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.process.MemoryMonitor;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +47,9 @@ public class PhenoAnnotIndex {
 
     public void runPipeline() throws Exception {
 
+        MemoryMonitor memoryMonitor = new MemoryMonitor();
+        memoryMonitor.start();
+
         long time0 = System.currentTimeMillis();
         log.info(getVersion());
         log.info("   "+dao.getConnectionInfo());
@@ -80,7 +84,10 @@ public class PhenoAnnotIndex {
         if( totalRowsUpToDate!=0 ) {
             log.info("   rows up-to-date: " + Utils.formatThousands(totalRowsUpToDate));
         }
+        memoryMonitor.stop();
+        log.info("   " + memoryMonitor.getSummary());
         log.info("=== OK ===  elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        log.info("");
     }
 
     public void run(String ontId, String sex, int speciesTypeKey) throws Exception {
