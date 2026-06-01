@@ -1,3 +1,6 @@
+Jun 1, 2026
+  simplified matching-records handling to a single O(n) pass; updated dependencies
+
 Mar 24, 2026
   added MemoryMonitor to track memory usage during pipeline run
   updated README.md

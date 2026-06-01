@@ -13,7 +13,6 @@ import org.springframework.core.io.FileSystemResource;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Pipeline job to populate PHENOMINER_RECORD_IDS table
@@ -133,58 +132,42 @@ public class PhenoAnnotIndex {
 
         // update records if needed
         Collection<Record> recordsMatching = CollectionUtils.intersection(recordsInRgd, incomingRecords);
-        handleMatchingRecords(recordsMatching, recordsInRgd, incomingRecords, msgPrefix);
+        handleMatchingRecords(recordsMatching, incomingRecords, msgPrefix);
 
         log.info("");
     }
 
-    void handleMatchingRecords( Collection<Record> recordsMatching, List<Record> recordsInRgd, List<Record> incomingRecords,
+    void handleMatchingRecords( Collection<Record> recordsMatching, List<Record> incomingRecords,
                                 String msgPrefix) throws Exception {
 
-        final AtomicInteger rowsUpToDate = new AtomicInteger(0);
-        final AtomicInteger rowsUpdated = new AtomicInteger(0); // list of expRecordIds could be updated
-        final List<Record> rowsForUpdate = new ArrayList<>();
+        // index incoming records by term acc (sex and species are constant within a run, so term acc is the key)
+        Map<String, Record> incomingByTermAcc = new HashMap<>();
+        for( Record r: incomingRecords ) {
+            incomingByTermAcc.put(r.getTermAcc(), r);
+        }
 
-        recordsMatching.parallelStream().forEach(r -> {
-            String termAcc = r.getTermAcc();
-            Record rInRgd = null;
-            Record rIncoming = null;
-
-            for( Record r1: recordsInRgd ) {
-                if( r1.getTermAcc().equals(termAcc) ) {
-                    rInRgd = r1;
-                    break;
-                }
-            }
-
-            for( Record r2: incomingRecords ) {
-                if( r2.getTermAcc().equals(termAcc) ) {
-                    rIncoming = r2;
-                    break;
-                }
-            }
-
+        // recordsMatching holds the in-rgd objects; compare each against its incoming counterpart
+        int rowsUpToDate = 0;
+        List<Record> rowsForUpdate = new ArrayList<>();
+        for( Record rInRgd: recordsMatching ) {
+            Record rIncoming = incomingByTermAcc.get(rInRgd.getTermAcc());
             if( rInRgd.getExpRecordIds().equals(rIncoming.getExpRecordIds()) ) {
-                rowsUpToDate.incrementAndGet();
+                rowsUpToDate++;
             } else {
-                rowsUpdated.incrementAndGet();
-
-                synchronized (rowsForUpdate) {
-                    rowsForUpdate.add(rIncoming);
-                }
+                rowsForUpdate.add(rIncoming);
             }
-        });
+        }
 
         dao.updateRecords(rowsForUpdate);
 
-        if( rowsUpToDate.get()!=0 ) {
-            log.info(msgPrefix + " records up-to-date " + Utils.formatThousands(rowsUpToDate.get()));
-            totalRowsUpToDate += rowsUpToDate.get();
+        if( rowsUpToDate!=0 ) {
+            log.info(msgPrefix + " records up-to-date " + Utils.formatThousands(rowsUpToDate));
+            totalRowsUpToDate += rowsUpToDate;
         }
 
-        if( rowsUpdated.get()!=0 ) {
-            log.info(msgPrefix + " records updated " + Utils.formatThousands(rowsUpdated.get()));
-            totalRowsUpdated += rowsUpdated.get();
+        if( !rowsForUpdate.isEmpty() ) {
+            log.info(msgPrefix + " records updated " + Utils.formatThousands(rowsForUpdate.size()));
+            totalRowsUpdated += rowsForUpdate.size();
         }
     }
 
