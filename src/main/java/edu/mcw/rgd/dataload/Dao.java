@@ -86,7 +86,7 @@ public class Dao {
     public int updateRecords(Collection<Record> records) throws Exception {
 
         String sqlUpdate = "UPDATE phenominer_record_ids SET experiment_record_ids=? "+
-            "WHERE term_acc=? AND NVL(sex,'*')=NVL(?,'*') AND species_type_key=?";
+            "WHERE term_acc=? AND COALESCE(sex,'*')=COALESCE(?,'*') AND species_type_key=?";
 
         int updated = 0;
         for( Record r: records ) {
